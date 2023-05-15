@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Not found";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .info-container {
+            margin-top: 4rem;
+            margin-bottom: 4rem;
+        }
+
+        .oops {
+            font-size: 6em;
+        }
+    </style>
+}
+
+<section class="container text-center info-container">
+    <h1 class="oops text-danger">Oops!</h1>
+    <h3 class="info">Page not found, please return to <a class="text-danger" asp-controller="Home" asp-action="Index">home</a> page.</h3>
+</section>

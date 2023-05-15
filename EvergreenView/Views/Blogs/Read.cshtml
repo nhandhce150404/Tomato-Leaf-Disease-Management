@@ -1,0 +1,34 @@
+﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@model EvergreenAPI.Models.Blog
+@using System.Net
+
+@{
+    ViewData["Title"] = Model.Title;
+    var thumbUrl = Configuration["BaseUrl"] + "/" + Model.Thumbnail.Url;
+}
+<div class="container">
+    <article>
+        <!-- Post header-->
+        <header class="mb-4">
+            <!-- Post title-->
+            <h1 class="fw-bolder mb-1">@Model.Title</h1>
+            <p>@Model.ViewCount views</p>
+            <!-- Post meta content-->
+            <div class="text-muted fst-italic mb-2">Posted on @Model.LastModifiedDate</div>
+        </header>
+        <section class="mb-5 text-dark">
+            <p class="fs-5 mb-4">@Model.Description</p>
+        </section>
+        <!-- Preview image figure-->
+        <figure class="mb-4">
+            <img alt="Thumbnail" style="width: 100%; height: 400px; object-fit: cover;" src='@thumbUrl' data-holder-rendered="true">
+        </figure>
+        <!-- Post content-->
+        <section class="mb-5 text-dark">
+            <div>
+                @Html.Raw(WebUtility.HtmlDecode(Model.Content))
+            </div>
+        </section>
+    </article>
+</div>

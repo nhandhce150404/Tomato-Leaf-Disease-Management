@@ -1,0 +1,58 @@
+﻿@model EvergreenAPI.Models.Treatment
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Edit treatment";
+    var listImages = ViewData["Thumbnails"] as SelectList;
+}
+
+<link href="
+https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css" rel="stylesheet">
+<h1 class="text-dark">Update Treatment</h1>
+<hr/>
+<div class="container">
+    <form asp-action="Edit" method="post" class="text-dark">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="TreatmentId"/>
+        <div class="form-group py-2">
+            <label asp-for="TreatmentName" class="control-label"></label>
+            <input asp-for="TreatmentName" class="form-control"/>
+            <span asp-validation-for="TreatmentName" class="text-danger"></span>
+        </div>
+        <div class="form-group py-2">
+            <label asp-for="Method" class="control-label"></label>
+            <textarea asp-for="Method" class="form-control" rows="10" cols="50"></textarea>
+            <span asp-validation-for="Method" class="text-danger"></span>
+        </div>
+
+        <div class="form-group py-2">
+            <label asp-for="ThumbnailId" class="control-label"></label>
+            <select asp-for="ThumbnailId" class="form-control" asp-items="listImages"></select>
+        </div>
+        <div class="form-group py-2">
+            <input type="submit" value="Save" class="btn btn-primary"/>
+            <a asp-action="AdminIndex" class="btn btn-success">Back To List</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+@if (TempData["error"] != null)
+{
+    <script>
+        window.onload = () => {
+            Swal.fire({
+                position: 'center',
+                icon: 'error',
+                title: '@TempData["error"]',
+                showConfirmButton: false,
+                timer: 1500
+            })
+        }
+    </script>
+}

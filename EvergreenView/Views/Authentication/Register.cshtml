@@ -1,0 +1,185 @@
+﻿@model EvergreenAPI.Models.Account
+@{
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+    ViewData["Title"] = "Register";
+}
+
+<style>
+    .form-group {
+        position: relative;
+    }
+
+        .form-group i {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+</style>
+
+<link href="
+https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css" rel="stylesheet">
+
+<form method="post" class="container">
+    <div class="card o-hidden border-0 shadow-lg my-5">
+        <div class="card-body p-0">
+            <!-- Nested Row within Card Body -->
+            <div class="row">
+                <div class="col-lg-5">
+                    <img src="~/images/tomatoLogin.jpg"/>
+                </div>
+                <div class="col-lg-7">
+                    <div class="p-5">
+                        <div class="text-center">
+                            <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
+                        </div>
+                        <form method="post">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group d-flex align-items-center">
+                                 <input asp-for="Username" class="form-control rounded-pill" placeholder="Username"/>
+                            </div>
+                            <span asp-validation-for="Username" class="text-danger">@ViewData["error"]</span>
+                            <div class="form-group d-flex align-items-center">
+                                 <input asp-for="Email" class="form-control rounded-pill" type="email" id="email" placeholder="Email Address" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger">@ViewData["error"]</span>
+                            <div class="form-group row ">
+                                <div class="col-sm-6 mb-3 mb-sm-0 show_hide">
+                                    <input asp-for="Password" class="form-control rounded-pill" type="password" id="password" placeholder="Password"/>
+                                    <i class="fa-solid fa-eye"></i>
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger">@ViewData["error"]</span>
+                                <div class="col-sm-6 show_hide">
+                                    <input asp-for="ConfirmPassword" class="form-control rounded-pill" type="password" id="confirm-password" placeholder="Confirm password"/>
+                                    <i class="fa-solid fa-eye"></i>
+                                </div>
+                                <span asp-validation-for="ConfirmPassword" id="confirm-error" class="text-danger">@ViewData["error"]</span>
+                            </div>
+                            <div class="form-group d-flex align-items-center">
+                                <input asp-for="FullName" class="form-control rounded-pill" placeholder="Full Name" />
+                            </div>
+                            <span asp-validation-for="FullName" class="text-danger">@ViewData["error"]</span>
+                            <div class ="form-group row">
+                                <div class="col-sm-12">
+                                    <input asp-for="PhoneNumber" class="form-control rounded-pill" placeholder="Phone Number" />
+                                </div>
+                                <span asp-validation-for="PhoneNumber" class="text-danger">@ViewData["error"]</span>
+                            </div>
+                            <div class="form-group py-2 mt-3">
+                                <input type="submit" value="Register" class="btn btn-danger btn-block p-3" id="submitBtn"/>
+                            </div>
+                        </form>
+                        <hr>
+                        <div class="text-center">
+                            <a class="small" asp-controller="Authentication" asp-action="Login">Already have an account? Login!</a>              
+                        </div>
+                        <div class="text-center"> 
+                            <a class="small" asp-controller="Home" asp-action="Index">Return to homepage!</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+<script src="https://kit.fontawesome.com/bdb952e5fa.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+<script>
+    const checking = document.querySelectorAll('.show_hide i')
+    const btn2 = document.querySelectorAll('.show_hide input')
+    checking[0].addEventListener('click', (e) => {
+        if (btn2[0].type === 'password') {
+            btn2[0].type = 'text'
+            checking[0].classList.remove('fa-solid')
+            checking[0].classList.remove('fa-eye')
+            checking[0].classList.add('fa-solid')
+            checking[0].classList.add('fa-eye-slash')
+        }
+        else {
+            btn2[0].type = 'password'
+            checking[0].classList.remove('fa-solid')
+            checking[0].classList.remove('fa-eye-slash')
+            checking[0].classList.add('fa-solid')
+            checking[0].classList.add('fa-eye')
+        }
+    })
+
+
+    checking[1].addEventListener('click', (e) => {
+        if (btn2[1].type === 'password') {
+            btn2[1].type = 'text'
+            checking[1].classList.remove('fa-solid')
+            checking[1].classList.remove('fa-eye')
+            checking[1].classList.add('fa-solid')
+            checking[1].classList.add('fa-eye-slash')
+        }
+        else {
+            btn2[1].type = 'password'
+            checking[1].classList.remove('fa-solid')
+            checking[1].classList.remove('fa-eye-slash')
+            checking[1].classList.add('fa-solid')
+            checking[1].classList.add('fa-eye')
+        }
+    })
+
+</script>
+
+
+<script>
+    let password = document.querySelector("#password");
+    let passwordConfirm = document.querySelector("#confirm-password");
+    let confirmErrorMessage = document.querySelector("#confirm-error");
+    let submitBtn = document.querySelector("#submitBtn")
+
+    passwordConfirm.addEventListener("keyup", () => {
+        let data = password.value;
+        let conf = passwordConfirm.value;
+
+        if (data !== conf) {
+            confirmErrorMessage.innerHTML = "Password does not match."
+            submitBtn.disabled = true
+        } else {
+            confirmErrorMessage.innerHTML = ""
+            submitBtn.disabled = false
+        }
+    })
+</script>
+
+
+@if (TempData["message"] != null)
+{
+    <script>
+        window.onload = () => {
+            Swal.fire({
+                position: 'center',
+                icon: 'success',
+                title: '@TempData["message"]',
+                showConfirmButton: false,
+                timer: 1500
+            })
+        }
+    </script>
+}
+
+@if (TempData["error"] != null)
+{
+    <script>
+        window.onload = () => {
+            Swal.fire({
+                position: 'center',
+                icon: 'error',
+                title: '@TempData["error"]',
+                showConfirmButton: false,
+                timer: 1500
+            })
+        }
+    </script>
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    }

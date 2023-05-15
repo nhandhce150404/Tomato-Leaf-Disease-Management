@@ -1,0 +1,129 @@
+﻿@model EvergreenAPI.DTO.LoginDto
+@{
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+    ViewData["Title"] = "Login";
+}
+<style>
+    .form-group{
+        position: relative;
+    }
+    .form-group i{
+        position: absolute;
+        right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+</style>
+
+<link href="
+https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css" rel="stylesheet">
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-12 col-md-9">
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-0">
+                    <!-- Nested Row within Card Body -->
+                    <div class="row">
+                        <div class="col-lg-6 d-none d-lg-block bg-login-image">
+                            <img src="~/images/tomatoLogin.jpg" class="img-fluid"/>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="p-5">
+                                <div class="text-center">
+                                    <h1 class="h4 text-gray-900 mb-4">Login</h1>
+                                </div>
+                                <form method="post">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                    <div class="form-group d-flex align-items-center">
+                                        <input asp-for="Email" class="form-control rounded-pill" type="email" placeholder="Email Address" />
+                                    </div>
+                                    <span asp-validation-for="Email" class="text-danger">@ViewData["error"]</span>
+                                    <div class="form-group d-flex align-items-center show_hide">
+                                        <input asp-for="Password" class="form-control rounded-pill" type="password" placeholder="Password"/>
+                                        <i class="fa-solid fa-eye"></i>
+                                    </div>
+                                    <span asp-validation-for="Password" class="text-danger">@ViewData["error"]</span>
+                                    <div class="form-groupmt-3">
+                                        <input type="submit" value="Login" class="btn btn-danger btn-block p-3" />
+                                    </div>
+                                </form>
+                                <hr>
+                                <div class="text-center">
+                                    <a class="small" asp-controller="Authentication" asp-action="ForgotPassword">Forgot Password?</a> |
+                                    <a class="small" asp-controller="Authentication" asp-action="Register">Register an Account!</a>
+                                </div>
+                                <div class="text-center">
+                                    <a class="small" asp-controller="Home" asp-action="Index">Return to homepage!</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<script src="https://kit.fontawesome.com/bdb952e5fa.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+@if (TempData["message"] != null)
+{
+    <script>
+        window.onload = () => {
+            Swal.fire({
+                position: 'center',
+                icon: 'success',
+                title: '@TempData["message"]',
+                showConfirmButton: false,
+                timer: 1500
+            })
+        }
+    </script>
+}
+
+@if (TempData["error"] != null)
+{
+    <script>
+        window.onload = () => {
+            Swal.fire({
+                position: 'center',
+                icon: 'error',
+                title: '@TempData["error"]',
+                showConfirmButton: false,
+                timer: 1500
+            })
+        }
+    </script>
+}
+
+<script>
+    const showHid = document.querySelector('.show_hide i')
+    const btn2 = document.querySelector('.show_hide input')
+    showHid.addEventListener('click', e => {
+        if (btn2.type === 'password') {
+            btn2.type = 'text'
+            showHid.classList.remove('fa-solid')
+            showHid.classList.remove('fa-eye')
+            showHid.classList.add('fa-solid')
+            showHid.classList.add('fa-eye-slash')
+        }
+        else {
+            btn2.type = 'password'
+            showHid.classList.remove('fa-solid')
+            showHid.classList.remove('fa-eye-slash')
+            showHid.classList.add('fa-solid')
+            showHid.classList.add('fa-eye')
+
+        }
+    })
+
+</script>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="evergreen_db@dpg-cgcs2g64dad6fr6qcuog-a.singapore-postgres.render.com" uuid="26745859-5a4d-452f-938f-bd8bbb9ba461">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://dpg-cgcs2g64dad6fr6qcuog-a.singapore-postgres.render.com:5432/evergreen_db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+  </component>
+</project>

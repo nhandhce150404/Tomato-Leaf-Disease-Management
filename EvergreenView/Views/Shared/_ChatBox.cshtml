@@ -1,0 +1,164 @@
+﻿@using Microsoft.AspNetCore.Http
+@using Microsoft.Extensions.Configuration
+@inject IHttpContextAccessor HttpContentAccessor
+@inject IConfiguration Configuration
+@{
+    var session = HttpContentAccessor.HttpContext?.Session;
+    var avatar = session.GetString("a") ?? "https://i.imgur.com/n1rrde0.png";
+}
+
+<style>
+    #submit-btn:disabled {
+        background: rgba(0, 0, 0, 0.6) !important;
+    }
+</style>
+
+<div id="frame">
+    <div class="content">
+        <div class="contact-profile">
+            <img src="~/images/doctor.jpg" alt="Doctor avatar" />
+            <p>Doctor AI</p>
+            <div class="close-container">
+                <i class="fa fa-minus" id="toggle-chat-btn"></i>
+            </div>
+        </div>
+        <div class="messages" id="msg-container">
+            <ul>
+                @if (string.IsNullOrEmpty(session.GetString("i")))
+                {
+                    <li class="replies">
+                        <img src="/images/doctor.jpg" alt="Doctor avatar" />
+                        <p>Please <a asp-action="Login" asp-controller="Authentication">login</a> to start a chat</p>
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="message-input">
+            <div class="wrap">
+                <input type="text" placeholder="Write your message..." />
+                <button class="submit" id="submit-btn" disabled="@(session.GetString("i") != string.Empty)">
+                    <i class="fa fa-paper-plane" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="uid" value="@session.GetString("i")" />
+<input type="hidden" id="avatar" value="@avatar" />
+<input type="hidden" id="baseUrl" value="@Configuration["BaseUrl"]"/>
+
+<script>
+    let isGenerating = false;
+    let baseUrl = $("#baseUrl").val()
+    let apiUrl = `${baseUrl}/api/Chat`
+    let uid = $("#uid").val();
+    let avatar = $("#avatar").val();
+
+    $(document).ready(() => {
+        if (uid) {
+            $.ajax({
+                contentType: false,
+                processData: false,
+                type: 'GET',
+                url: apiUrl + "/" + uid,
+                error: function (xhr, status, error) {
+                    console.log(error)
+                }, success: function (res) {
+                    let arr = res.split("/eol/")
+                    for (let i = 0; i < arr.length; i++) {
+                        let msg
+                        if (i % 2 === 0) {
+                            // AI response
+                            msg = arr[i].slice(4)
+
+                            $(
+                                `<li class="replies"><img src="/images/doctor.jpg" alt="Doctor avatar" /><p>` +
+                                msg +
+                                "</p></li>"
+                            ).appendTo($(".messages ul"));
+                        } else {
+                            // Human response
+                            msg = arr[i].slice(7)
+
+                            $(
+                                `<li class="sent"><img src="`
+                                 + avatar
+                                  + `" alt="User avatar" /><p>` +
+                                msg +
+                                "</p></li>"
+                            ).appendTo($(".messages ul"));
+                        }
+                    }
+                }
+            });
+            $("#msg-container").animate({ scrollTop: $('#msg-container').prop("scrollHeight") }, 1000);
+        }
+    })
+
+    $("#toggle-chat-btn").click(function () {
+        $("#frame").toggleClass("expanded")
+    });
+
+    function newMessage() {
+        let message = $(".message-input input").val();
+        if ($.trim(message) === "") {
+            return false;
+        }
+        $(
+            `<li class="sent"><img src="`
+            + avatar
+            + `" alt="User avatar" /><p>` +
+            message +
+            "</p></li>"
+        ).appendTo($(".messages ul"));
+        $(".message-input input").val(null);
+
+        if (uid) {
+            console.log(uid)
+            $.ajax({
+                contentType: "application/json",
+                processData: false,
+                type: 'POST',
+                url: apiUrl + "/" + uid,
+                data: JSON.stringify(message),
+                error: function (xhr, status, error) {
+                    console.log(error)
+                }, success: function (res) {
+                    $(
+                        '<li class="replies"><img src="/images/doctor.jpg" alt="Doctor avatar" /><p>' +
+                        res +
+                        "</p></li>"
+                    ).appendTo($(".messages ul"));
+                }, complete: function () {
+                    isGenerating = false;
+                }
+            });
+        } else {
+            $(
+                '<li class="replies"><img src="/images/doctor.jpg" alt="Doctor avatar" /><p>' +
+                "Please login first!" +
+                "</p></li>"
+            ).appendTo($(".messages ul"));
+        }
+
+        $(".messages").animate({ scrollTop: $(document).height() }, "fast");
+        isGenerating = false;
+        $("submit-btn").prop("disabled", "false")
+    }
+
+    $(".submit").click(function () {
+        if (isGenerating) return;
+
+        isGenerating = true;
+        $("submit-btn").prop("disabled", "true")
+        newMessage();
+    });
+
+    $(window).on("keydown", function (e) {
+        if (e.which === 13) {
+            newMessage();
+            return false;
+        }
+    });
+</script>

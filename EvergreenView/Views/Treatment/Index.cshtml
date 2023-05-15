@@ -1,0 +1,260 @@
+@using Microsoft.Extensions.Configuration
+@model IEnumerable<EvergreenAPI.Models.Treatment>
+@inject IConfiguration Configuration
+@{
+    ViewData["Title"] = "Treatments";
+}
+<style>
+    .text-ellipsis {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+
+    .bot_number {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        height: 100px;
+        margin-top: 20px;
+        font-size: 18px;
+        color: white;
+        gap: 19px;
+        align-items: center;
+    }
+
+        .bot_number button {
+            display: flex;
+            height: 30px;
+            width: 30px;
+            justify-content: center;
+            align-items: center;
+            border-radius: 100%;
+            border: solid 1px black;
+            cursor: pointer;
+            font-size: 18px;
+            color: black;
+            background-color: white;
+            transition: all 0.2s ease-in-out;
+            font-weight: 600;
+        }
+
+            .bot_number button i {
+                transition: all 0.2s ease-in-out;
+            }
+
+            .bot_number button:hover > i {
+                transform: scale(1.5);
+            }
+
+            .bot_number button.active {
+                opacity: 0.1;
+                cursor: none;
+                pointer-events: none;
+            }
+
+    .list_number {
+        display: flex;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
+        border-radius: 18px;
+        cursor: pointer;
+        gap: 15px;
+    }
+
+        .list_number span {
+            display: flex;
+            height: 30px;
+            justify-content: center;
+            align-items: center;
+            border-radius: 100%;
+            border: solid 1px black;
+            cursor: pointer;
+            font-size: 14px;
+            color: black;
+            width: 30px;
+            transition: all 0.2s ease-in-out;
+            font-weight: 600;
+        }
+
+            .list_number span.active {
+                transform: scale(1.3);
+            }
+
+            .list_number span:hover {
+                transform: rotate(360deg);
+            }
+
+    .list_product {
+        display: none;
+    }
+
+    .bg-image {
+        object-fit: cover;
+        overflow: hidden;
+    }
+
+        .bg-image:hover > img {
+            transform: scale(1.5)
+        }
+
+        .bg-image img {
+            transition: all 0.2s ease-in-out;
+        }
+
+</style>
+
+<div class="container">
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            var thumbUrl = Configuration["BaseUrl"] + "/" + item.Thumbnail.Url;
+            <div class="col-lg-4 col-md-12 mb-4 ftco-animate list_product">
+                <div class="card" style="justify-content: space-between; ">
+                    <div class="bg-image hover-overlay ripple" data-mdb-ripple-color="light" style="width: 100%; height: 200px;">
+                        <img class="img-fluid" alt="Thumbnail" style="width: 100%; height: 100%; object-fit: cover;" src='@thumbUrl' data-holder-rendered="true">
+                        <a href="#">
+                            <div class="mask" style="background-color: rgba(251, 251, 251, 0.15);"></div>
+                        </a>
+                    </div>
+                    <div class="card-body" style="display: flex; flex-direction: column; justify-content: space-between;">
+                        <h5 class="card-title" style="height: 50px">@item.TreatmentName</h5>
+                        <p class="card-text text-ellipsis" style="height: 100px">
+                            @item.Method
+                        </p>
+                        <a class="btn btn-danger rounded" asp-action="Details" asp-route-id="@item.TreatmentId"> Read More </a>
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="bot_number">
+            <button class="pre active">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <div class="list_number">
+            </div>
+            <button class="next">
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://kit.fontawesome.com/bdb952e5fa.js" crossorigin="anonymous"></script>
+
+<script>
+    const btnPre = document.querySelector('.pre')
+    const btnNext = document.querySelector('.next')
+    const listProduct = document.querySelectorAll(".list_product")
+    let perPage = 6
+    let currentPage = 1
+    let start = 0
+    let end = perPage
+    const totalPage = Math.ceil(listProduct.length / perPage)
+    const renderProduct = () => {
+        const contents = listProduct.forEach((item, idx) => {
+            if (idx >= start && idx < end) {
+                item.style.display = "revert"
+            }
+            else item.style.display = "none"
+        })
+    }
+
+    renderProduct()
+    const handelShow = (next, pre) => {
+        next.addEventListener('click', e => {
+            currentPage++
+            if (currentPage >= totalPage) {
+                currentPage = totalPage
+            }
+            if (currentPage == totalPage) {
+                btnNext.classList.add('active')
+            }
+            handelActive(currentPage)
+            btnPre.classList.remove('active')
+            start = (currentPage - 1) * perPage
+            end = currentPage * perPage
+            renderProduct()
+        })
+        pre.addEventListener('click', e => {
+            currentPage--
+            if (currentPage < 1) {
+                currentPage = 1
+            }
+            if (currentPage == 1) {
+                btnPre.classList.add('active')
+            }
+            handelActive(currentPage)
+            btnNext.classList.remove('active')
+            start = (currentPage - 1) * perPage
+            end = currentPage * perPage
+            console.log(start, end);
+            renderProduct()
+        })
+    }
+    const renderWithNumber = (currentNumberPage) => {
+        start = (currentNumberPage - 1) * perPage
+        end = currentNumberPage * perPage
+        renderProduct()
+    }
+    const changePage = () => {
+        const curentNumber = document.querySelectorAll('.list_number span')
+        curentNumber[0].classList.add('active')
+        curentNumber.forEach((el, idx) => {
+            el.addEventListener('click', e => {
+                for (let i = 0; i < curentNumber.length; i++) {
+                    const elements = curentNumber[i]
+                    elements.classList.remove('active')
+                }
+                curentNumber[idx].classList.add('active')
+                let value = idx + 1
+                currentPage = value
+                console.log(currentPage);
+                renderWithNumber(currentPage)
+                handelBtn(value)
+            })
+        })
+    }
+    const listNumber = () => {
+        html = ''
+        for (let i = 0; i < totalPage; i++) {
+            html += `<span>${i + 1} </span>`
+        }
+        document.querySelector('.list_number').innerHTML = html
+    }
+    const handelActive = (el) => {
+        const curentNumber = document.querySelectorAll('.list_number span')
+        for (let i = 0; i < curentNumber.length; i++) {
+            const element = curentNumber[i];
+            element.classList.remove('active')
+
+        }
+        curentNumber[el - 1].classList.add('active')
+    }
+
+    const handelBtn = (numberAdd) => {
+        if (numberAdd == totalPage) {
+            btnNext.classList.add('active')
+            btnPre.classList.remove('active')
+        }
+        else {
+            btnNext.classList.remove('active')
+        }
+        if (numberAdd == 1) {
+            btnPre.classList.add('active')
+            btnNext.classList.remove('active')
+        }
+        else {
+            btnPre.classList.remove('active')
+        }
+
+    }
+
+    renderProduct()
+    handelShow(btnNext, btnPre)
+    listNumber()
+    changePage()
+</script>

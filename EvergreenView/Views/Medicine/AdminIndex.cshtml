@@ -1,0 +1,318 @@
+﻿@model IEnumerable<EvergreenAPI.Models.Medicine>
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Medicine management";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css" rel="stylesheet">
+
+<style>
+    .element_table {
+        display: none;
+    }
+
+    .bot_number {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        height: 100px;
+        margin-top: 20px;
+        font-size: 18px;
+        color: white;
+        gap: 16px;
+        align-items: center;
+    }
+
+        .bot_number button {
+            display: flex;
+            height: 30px;
+            width: 30px;
+            justify-content: center;
+            align-items: center;
+            border-radius: 18px;
+            background-color: #4E73DF;
+            cursor: pointer;
+            border: none;
+            font-size: 18px;
+            color: white;
+            transition: all 0.2s ease-in-out;
+        }
+
+            .bot_number button i {
+                transition: all 0.2s ease-in-out;
+            }
+
+            .bot_number button:hover > i {
+                transform: scale(1.5);
+            }
+
+            .bot_number button:hover {
+                background-color: #7a9afa;
+            }
+
+            .bot_number button.active {
+                opacity: 0.5;
+                cursor: none;
+                pointer-events: none;
+            }
+
+    .list_number {
+        display: flex;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
+        border-radius: 18px;
+        cursor: pointer;
+        gap: 12px;
+    }
+
+        .list_number span {
+            display: flex;
+            height: 30px;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            background-color: #4E73DF;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            color: white;
+            width: 30px;
+            transition: all 0.2s ease-in-out;
+        }
+
+            .list_number span.active {
+                height: 40px;
+                width: 40px;
+            }
+
+            .list_number span:hover {
+                background-color: #7a9afa;
+            }
+
+    .list_product {
+        display: none;
+    }
+
+</style>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h4 class="m-0 font-weight-bold text-primary">Medicine Managements</h4>
+        <div class="d-flex justify-content-between align-items-center">
+            <a class="btn btn-primary text-white" asp-action="Create"> <i class="fa fa-plus fa-fw"></i> Create New</a>
+            <form method="get" class="ml-2">
+                <div class="input-group">
+                    <div class="form-outline">
+                        <input type="search" name="searchString" placeholder="Search by Name.." class="form-control"/>
+                    </div>
+                    <button type="submit" value="Search" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered text-dark" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Name)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Uses)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.MedicineCategory)
+                        </th>
+                        <th hidden>
+                            @Html.DisplayNameFor(model => model.ThumbnailId)
+                        </th>
+                        <th>
+                            Details
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr class="element_table">
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Uses)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.MedicineCategory.Name)
+                            </td>
+                            <td hidden>
+                                @Html.DisplayFor(modelItem => item.Thumbnail.Url)
+                            </td>
+                            <td>
+                                <a asp-action="AdminDetails" asp-route-id="@item.MedicineId" class="btn btn-info"> View <i class="fa fa-eye"></i> </a>
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+            <div class="bot_number">
+                <button class="pre active">
+                    <i class="fa-solid fa-arrow-left" style="color: #ffffff;"></i>
+                </button>
+                <div class="list_number">
+                </div>
+                <button class="next">
+                    <i class="fa-solid fa-arrow-right" style="color: #ffffff;"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+
+<script src="https://kit.fontawesome.com/bdb952e5fa.js" crossorigin="anonymous"></script>
+
+
+@if (TempData["message"] != null)
+{
+    <script>
+        window.onload = () => {
+            Swal.fire({
+                position: 'center',
+                icon: 'success',
+                title: '@TempData["message"]',
+                showConfirmButton: false,
+                timer: 1500
+            })
+        }
+    </script>
+    TempData["message"] = null;
+
+}
+
+@section Scripts{
+    <script>
+        const btnPre = document.querySelector('.pre')
+        const btnNext = document.querySelector('.next')
+        const listProduct = document.querySelectorAll(".element_table")
+        let perPage = 5
+        let currentPage = 1
+        let start = 0
+        let end = perPage
+        const totalPage = Math.ceil(listProduct.length / perPage)
+        const renderProduct = () => {
+            const contents = listProduct.forEach((item, idx) => {
+                if (idx >= start && idx < end) {
+                    item.style.display = "revert"
+                }
+                else item.style.display = "none"
+            })
+        }
+
+        renderProduct()
+        const handelShow = (next, pre) => {
+            next.addEventListener('click', e => {
+                currentPage++
+                if (currentPage >= totalPage) {
+                    currentPage = totalPage
+                }
+                if (currentPage == totalPage) {
+                    btnNext.classList.add('active')
+                }
+                handelActive(currentPage)
+                btnPre.classList.remove('active')
+                start = (currentPage - 1) * perPage
+                end = currentPage * perPage
+                renderProduct()
+            })
+            pre.addEventListener('click', e => {
+                currentPage--
+                if (currentPage < 1) {
+                    currentPage = 1
+                }
+                if (currentPage == 1) {
+                    btnPre.classList.add('active')
+                }
+                handelActive(currentPage)
+                btnNext.classList.remove('active')
+                start = (currentPage - 1) * perPage
+                end = currentPage * perPage
+                console.log(start, end);
+                renderProduct()
+            })
+        }
+        const renderWithNumber = (currentNumberPage) => {
+            start = (currentNumberPage - 1) * perPage
+            end = currentNumberPage * perPage
+            renderProduct()
+        }
+        const changePage = () => {
+            const curentNumber = document.querySelectorAll('.list_number span')
+            curentNumber[0].classList.add('active')
+            curentNumber.forEach((el, idx) => {
+                el.addEventListener('click', e => {
+                    for (let i = 0; i < curentNumber.length; i++) {
+                        const elements = curentNumber[i]
+                        elements.classList.remove('active')
+                    }
+                    curentNumber[idx].classList.add('active')
+                    let value = idx + 1
+                    currentPage = value
+                    console.log(currentPage);
+                    renderWithNumber(currentPage)
+                    handelBtn(value)
+                })
+            })
+        }
+        const listNumber = () => {
+            html = ''
+            for (let i = 0; i < totalPage; i++) {
+                html += `<span>${i + 1} </span>`
+            }
+            document.querySelector('.list_number').innerHTML = html
+        }
+        const handelActive = (el) => {
+            const curentNumber = document.querySelectorAll('.list_number span')
+            for (let i = 0; i < curentNumber.length; i++) {
+                const element = curentNumber[i];
+                element.classList.remove('active')
+
+            }
+            curentNumber[el - 1].classList.add('active')
+        }
+
+        const handelBtn = (numberAdd) => {
+            if (numberAdd == totalPage) {
+                btnNext.classList.add('active')
+                btnPre.classList.remove('active')
+            }
+            else {
+                btnNext.classList.remove('active')
+            }
+            if (numberAdd == 1) {
+                btnPre.classList.add('active')
+                btnNext.classList.remove('active')
+            }
+            else {
+                btnPre.classList.remove('active')
+            }
+
+        }
+
+        renderProduct()
+        handelShow(btnNext, btnPre)
+        listNumber()
+        changePage()
+
+
+    </script>
+}
+

@@ -1,0 +1,82 @@
+﻿@using EvergreenAPI.DTO
+@model VerifyAccountDto
+
+@{
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+    ViewData["Title"] = "Account verification";
+}
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css" rel="stylesheet">
+<div class="container">
+    <!-- Outer Row -->
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-12 col-md-9">
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-0">
+                    <!-- Nested Row within Card Body -->
+                    <div class="row">
+                        <div class="col-lg-6 d-none d-lg-block bg-password-image">
+                            <img src="~/images/tomatoFP.jpg" class="img-fluid"/>
+
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="p-5">
+                                <div class="text-center" style="margin-top: 25px">
+                                    <h1 class="h4 text-gray-900 mb-2">Verify Your Account!</h1>
+                                    <p class="mb-4">
+                                        Please check out your email address.
+                                        We have sent a token to verify your account!
+                                    </p>
+                                </div>
+                                <form asp-action="VerifyAccount" asp-controller="Authentication" method="post">
+                                    <input type="text" asp-for="Email" name="email" class="form-control rounded-pill" hidden/>
+                                    <div class="form-group py-2">
+                                        <input asp-for="Token" name="token" type="text" id="form3Example3" class="form-control rounded-pill"
+                                               placeholder="Enter your token here" style="margin-top: 10px"/>
+                                    </div>
+                                    <div class="text-center py-2">
+                                        <button type="submit" class="btn btn-lg text-white"
+                                                style="padding-left: 2.5rem; padding-right: 2.5rem; background-color:#CF2323" value="VerifyAccount" id="submitBtn">
+                                            Submit
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+@if (TempData["message"] != null)
+{
+    <script>
+        window.onload = () => {
+            Swal.fire({
+                position: 'center',
+                icon: 'success',
+                title: '@TempData["message"]',
+                showConfirmButton: false,
+                timer: 1500
+            })
+        }
+    </script>
+}
+
+@if (TempData["error"] != null)
+{
+    <script>
+        window.onload = () => {
+            Swal.fire({
+                position: 'center',
+                icon: 'error',
+                title: '@TempData["error"]',
+                showConfirmButton: false,
+                timer: 1500
+            })
+        }
+    </script>
+}

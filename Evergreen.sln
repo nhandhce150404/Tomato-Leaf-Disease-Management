@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32929.385
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EvergreenAPI", "EvergreenAPI\EvergreenAPI.csproj", "{336F6662-0017-47CC-95AB-ABE4A6DE9677}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EvergreenView", "EvergreenView\EvergreenView.csproj", "{52C4F818-E327-4D47-BD5B-43E4B08CF738}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{336F6662-0017-47CC-95AB-ABE4A6DE9677}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{336F6662-0017-47CC-95AB-ABE4A6DE9677}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{336F6662-0017-47CC-95AB-ABE4A6DE9677}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{336F6662-0017-47CC-95AB-ABE4A6DE9677}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52C4F818-E327-4D47-BD5B-43E4B08CF738}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52C4F818-E327-4D47-BD5B-43E4B08CF738}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52C4F818-E327-4D47-BD5B-43E4B08CF738}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52C4F818-E327-4D47-BD5B-43E4B08CF738}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5A8B1263-C08E-462C-BB80-3E96044CDE40}
+	EndGlobalSection
+EndGlobal

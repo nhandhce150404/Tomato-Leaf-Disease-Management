@@ -1,0 +1,345 @@
+﻿@using Microsoft.AspNetCore.Http;
+@using Microsoft.Extensions.Configuration
+@inject IHttpContextAccessor HttpContentAccessor
+@inject IConfiguration Configuration
+@{
+    var session = HttpContentAccessor.HttpContext?.Session;
+    ViewData["Title"] = "Disease detection";
+}
+
+@section Styles {
+    <style>
+        .wrapper {
+            max-width: 640px;
+            padding-top: 60px;
+            text-align: center;
+            margin: auto auto 3em;
+        }
+
+        .browse-container {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        h1.title {
+            color: #130f40;
+            letter-spacing: -.5px;
+            font-weight: 700;
+            padding-bottom: 16px;
+        }
+
+        .upload-container {
+            background-color: rgb(239, 239, 239);
+            border-radius: 6px;
+            padding: 10px;
+        }
+
+        .border-container {
+            border: 5px dashed rgba(198, 198, 198, 0.65);
+            padding: 20px;
+            position: relative;
+        }
+
+            .border-container p {
+                color: #130f40;
+                font-weight: 600;
+                font-size: 1.1em;
+                letter-spacing: -1px;
+                margin: 12px auto;
+                opacity: 0.65;
+                user-select: none;
+            }
+
+                .border-container p:hover {
+                    cursor: default;
+                }
+
+        #file-upload {
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            position: absolute;
+        }
+
+        #file-browser {
+            text-decoration: none;
+            color: rgb(22,42,255);
+            border-bottom: 3px dotted rgba(22, 22, 255, 0.85);
+        }
+
+            #file-browser:hover {
+                color: rgb(0, 0, 255);
+                border-bottom: 3px dotted rgba(0, 0, 255, 0.85);
+            }
+
+        #submit-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .list-group-item:hover {
+            cursor: pointer;
+            transition: background .2s ease;
+            background: rgb(239, 239, 239);
+        }
+
+        .list-group-title {
+            position: relative;
+            padding: 0.75rem 1.25rem;
+            margin-bottom: -1px;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0);
+        }
+
+        .item-link {
+            text-decoration: none;
+            color: black;
+        }
+
+            .item-link:hover {
+                color: rgb(220, 53, 69) !important;
+                cursor: pointer;
+            }
+
+        #small {
+            opacity: 0.5;
+            font-size: 0.9em;
+        }
+
+        code {
+            font-family: 'Poppins', sans-serif;
+            letter-spacing: 0.15px;
+        }
+
+        .selected-file {
+            border-radius: 8px;
+            border-bottom: 1px solid rgb(209, 213, 219);
+        }
+
+            .selected-file:hover img {
+                opacity: 0.4;
+            }
+
+                .selected-file:hover img:hover {
+                    opacity: 0.8;
+                }
+
+            .selected-file img {
+                width: 24px;
+                height: 24px;
+                padding: 4px;
+                opacity: 0;
+                cursor: pointer;
+                transition: opacity 0.2s ease;
+            }
+        </style>
+}
+
+<div class="wrapper">
+    <div class="browse-container ftco-animate">
+        <h1 class="title">Upload a file</h1>
+        <div class="upload-container">
+            <div class="border-container" method="post">
+                <input type="file" id="file-upload" title="Click to choose image" multiple>
+                <p id="preview">
+                    <a href="#" id="file-browser">Browse</a> from your computer.
+                </p>
+                <p id="small">For best result, we recommend using <code>.JPEG</code> format</p>
+            </div>
+        </div>
+        <div class="container mt-4" id="file-container">
+        </div>
+        <button id="submit-btn"
+                class="btn btn-block btn-danger text-white mt-4 p-2"
+                disabled>
+            Submit
+        </button>
+    </div>
+</div>
+
+<div class="container ftco-animate">
+    <h3 class="text-center title">History</h3>
+    <p class="text-center" id="blank-history">There's currently no files in your history, please try detect one.</p>
+    <div class="mb-2 list-group-title" id="histories">
+        <div class="d-flex justify-content-between" title="Click to view details">
+            <span class="img-name w-25">Image name</span>
+            <span class="disease-name w-25">Detected disease</span>
+            <span class="w-25">Expert Confirmed</span>
+            <span class="acc w-25 text-right">Accuracy</span>
+        </div>
+    </div>
+
+    <div id="data-container"></div>
+    <div id="pagination-container"></div>
+</div>
+
+<input type="hidden" id="pass-data" value="@ViewBag.history"/>
+<input type="hidden" id="uid" value="@session.GetString("i")"/>
+<input type="hidden" id="baseUrl" value="@Configuration["BaseUrl"]"/>
+
+@section Scripts {
+    <script>
+        $("#file-upload").css("opacity", "0");
+
+        let files = [];
+        $("#file-upload").on("change", () => {
+            let fileCount = $("#file-upload").get(0).files.length
+            for (let i = 0; i < fileCount; i++) {
+                let fileName = $("#file-upload").get(0).files[i].name
+
+                // Ignore existing files
+                if (files.indexOf(fileName) !== -1) continue;
+                files.push(fileName)
+
+                let newDiv = document.createElement("div")
+                newDiv.classList.add("selected-file", "d-flex", "justify-content-between", "align-content-center", "mt-2", "p-2")
+                let newSpan = document.createElement("span")
+                newSpan.innerHTML = fileName
+                newSpan.classList.add("file-name", "text-ellipsis")
+                let newIcon = document.createElement("img")
+                newIcon.setAttribute("src", "images/close.png")
+                newIcon.setAttribute("alt", "Remove")
+                newIcon.addEventListener("click", () => handleSelectedFileClick(newDiv, fileName))
+
+                newDiv.appendChild(newSpan)
+                newDiv.appendChild(newIcon)
+
+                $("#file-container").append(newDiv)
+            }
+
+            $("#submit-btn").prop("disabled", files.length<=0)
+        })
+
+        const handleSelectedFileClick = (elem, fileName) => {
+            // Remove clicked file from file list
+            files = files.filter(item => item !== fileName)
+            console.log(files)
+            $("#submit-btn").prop("disabled", files.length<=0)
+            // Remove clicked file in the file container
+            elem.remove()
+        }
+
+        $("#preview, #small").click((e) => {
+            e.preventDefault();
+            $("#file-upload").trigger("click");
+        });
+
+        function simpleTemplating(data) {
+            let html = `<ul class="list-group">`;
+            data.forEach((item) => {
+                html += `<li class="list-group-item mb-2">`
+                    + `<a class="item-link" href="/ImageDetection/Details/${item["DetectionHistoryId"]}">`
+                    + `<div class="d-flex justify-content-between" title="Click to view details">`
+                    + `<span class="img-name w-25">${item["ImageName"]}</span>`
+                    + `<span class="disease-name w-25">${item["DetectedDisease"]}</span>`
+                    + `<span class="w-25">${item["IsExpertConfirmed"]}</span>`
+                    + `<span class="acc w-25 text-right">${item["Accuracy"]}</span>`
+                    + `</div>`
+                    + `</a>`
+                    + `</li>`;
+            })
+            html += `</ul>`;
+            return html;
+        }
+
+        let sample = []
+        $(document).ready(() => {
+            let data = $("#pass-data").val()
+            sample = JSON.parse(data)
+            if (sample.length === 0) {
+                $("#blank-history").css("display", "block")
+                $("#histories").css("display", "none")
+            }
+            else {
+                $("#blank-history").css("display", "none")
+                $("#histories").css("display", "block")
+                paginate(sample)
+            }
+        })
+
+        const paginate = (data) => {
+            // History pagination
+            $('#pagination-container').pagination({
+                dataSource: data,
+                pageSize: 8,
+                callback: function (data, pagination) {
+                    // template method of yourself
+                    let html = simpleTemplating(data);
+                    $('#data-container').html(html);
+                }
+            })
+        }
+
+        $("#submit-btn").on("click", (e) => {
+            e.preventDefault();
+            let baseUrl = $("#baseUrl").val()
+            let apiUrl = `${baseUrl}/api/DetectionHistory`
+            let uid = $("#uid").val()
+            // Disabling submit button, avoid spammer
+            $("#submit-btn").attr("disabled", true);
+
+            files.forEach(async (_, index) => {
+                let fileData = $("#file-upload").get(0).files[index]
+
+                let formData = new FormData();
+                formData.append('image', fileData)
+                formData.append('uid', uid)
+
+                await uploadImage(formData, apiUrl)
+            })
+
+            // Remove previous list first
+            $('#pagination-container').empty()
+            $('#file-container').empty()
+            // Remove blank history notification
+            $("#blank-history").css("display", "none")
+            $("#histories").css("display", "block")
+            // Re-render data without reload
+            $.ajax({
+               contentType: false,
+               processData: false,
+               url: `${apiUrl}/${uid}`,
+               success: function (data, textStatus, xhr) {
+                   // Transform text to PascalCase format
+                   for (let i = 0; i < data.length; i++) {
+
+                       const a = data[i];
+                       for (const key in a) {
+                           if (a.hasOwnProperty(key)) {
+                               a[key.charAt(0).toUpperCase() + key.substring(1)] = a[key];
+                               delete a[key];
+
+                           }
+                       }
+                       data[i] = a;
+
+                   }
+
+                   // Finally, paginate them
+                   paginate(data)
+               }, error: function (xhr, status, error) {
+                   console.log(error)
+               }
+            });
+        })
+
+        const uploadImage = async (formData, apiUrl) => {
+            await function () {
+                $.ajax({
+                    contentType: false,
+                    processData: false,
+                    type: 'POST',
+                    async: false,
+                    url: apiUrl,
+                    data: formData,
+                    error: function (xhr, status, error) {
+                        console.log(error)
+                    }, complete: function () {
+                        $("#submit-btn").attr("disabled", false);
+                    }
+                });
+            }()
+        }
+    </script>
+}

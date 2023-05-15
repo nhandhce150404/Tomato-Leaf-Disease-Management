@@ -1,0 +1,112 @@
+﻿@model List<EvergreenAPI.Models.DetectionAccuracy>
+@{
+    ViewData["Title"] = "Detection details";
+    var detectedDisease = Model.OrderByDescending(i => i.Accuracy).FirstOrDefault()?.Disease;
+}
+
+@section Styles {
+    <style>
+        #chart {
+            width: 350px !important;
+            height: 350px !important;
+        }
+
+        #detected {
+            font-size: 1.25em;
+            width: fit-content;
+        }
+
+        .container > section {
+            color: black;
+        }
+
+            .container > section::first-letter {
+                font-size: 1.75em;
+            }
+            
+         .disease-name {
+              border-radius: 4px;
+              padding: 4px 8px;
+              color: white;
+        }
+            
+         .text-acc:nth-child(1) .disease-name {
+            background: rgb(255, 99, 132);
+         }
+         .text-acc:nth-child(2) .disease-name {
+             background: rgb(54, 162, 235);
+          }
+          .text-acc:nth-child(3) .disease-name {
+              background: rgb(255, 205, 86);
+           }
+           .text-acc:nth-child(4) .disease-name {
+               background: rgb(75, 192, 192);
+            }
+    </style>
+}
+
+<div class="container">
+    <h3 class="text-center">Our <code>AI</code> has detected disease in your image as:</h3>
+    <a asp-controller="Disease"
+       asp-action="Details"
+       asp-route-id="@detectedDisease!.DiseaseId"
+       id="detected"
+       class="text-center btn btn-outline-dark d-block m-auto">@detectedDisease.Name</a>
+
+    <div class="row d-flex align-items-center justify-content-around my-5 p-3 rounded"
+         style="box-shadow: rgba(0, 0, 0, 0.12) 0 1px 3px, rgba(0, 0, 0, 0.24) 0 1px 2px;">
+        <canvas id="chart"></canvas>
+        <div class="col-md-4">
+            @foreach (var item in Model)
+            {
+                <p class="d-flex justify-content-between align-items-center text-acc">
+                    <span class="disease-name">@item.Disease.Name:</span>
+                    <span class="acc">@((decimal)item.Accuracy)</span>
+                </p>
+            }
+        </div>
+    </div>
+
+    <h4 class="text-center mb-3">More details about @detectedDisease!.Name</h4>
+    <section>Affects: @detectedDisease.Affect</section>
+    <section>Symptoms: @detectedDisease.Identification</section>
+    <section>Medicine: @detectedDisease.Medicine.Name</section>
+    <section>Treatment: @detectedDisease.Treatment.Method</section>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(() => {
+            let chart = document.querySelector("#chart")
+            let nodes = document.querySelectorAll(".acc")
+            let acc = []
+            for (let i = 0; i < nodes.length; i++) acc.push(parseFloat(nodes[i].innerHTML))
+
+            nodes = document.querySelectorAll(".disease-name")
+            let labels = []
+            for (let i = 0; i < nodes.length; i++) labels.push(nodes[i].innerHTML)
+
+            const data = {
+                labels: labels,
+                responsive: true,
+                datasets: [{
+                    label: 'Detected',
+                    data: acc,
+                    backgroundColor: [
+                        'rgb(255, 99, 132)',
+                        'rgb(54, 162, 235)',
+                        'rgb(255, 205, 86)',
+                        'rgb(75, 192, 192)'
+                    ],
+                    hoverOffset: 4
+                }]
+            }
+
+            new Chart(chart, {
+                type: 'doughnut',
+                data: data
+            });
+        })
+    </script>
+}
